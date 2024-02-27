@@ -11,6 +11,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ env.DATABASE_URL }}
 
     steps:
     - name: Checkout code
