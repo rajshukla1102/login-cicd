@@ -12,8 +12,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }} # Use 'secrets' instead of 'env'
-
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
