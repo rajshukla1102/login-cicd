@@ -16,6 +16,12 @@ jobs:
       TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
       TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
     steps:
+      - name: Print Environment Variables
+        run: |
+          echo "DATABASE_URL: $DATABASE_URL"
+          echo "TEST_USERNAME: $TEST_USERNAME"
+          echo "TEST_PASSWORD: $TEST_PASSWORD"
+
       - name: Checkout code
         uses: actions/checkout@v2
 
