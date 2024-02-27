@@ -1,41 +1,52 @@
-name: Rust CI
+name: Rust CI/CD  
 
 on:
   push:
     branches:
       - master
   pull_request:
-    branches:
+    branches: 
       - master
 
 jobs:
+
   build:
+
     runs-on: ubuntu-latest
+    
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }} 
+      TEST_USERNAME: ${{ secrets.TEST_USERNAME }}  
       TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+    
     steps:
-      - name: Print Environment Variables
-        run: |
-          echo "DATABASE_URL h: $DATABASE_URL"
-          echo "TEST_USERNAME: $TEST_USERNAME"
-          echo "TEST_PASSWORD: $TEST_PASSWORD"
+    - uses: actions/checkout@v2
 
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Install Postgres  
+      run: |  
+        sudo apt update
+        sudo apt install -y libpq-dev
 
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
+    - name: Build  
+      run: cargo build --verbose
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y libpq-dev 
-          cargo build --verbose
+    - name: Test
+      run: cargo test --verbose
 
-      - name: Run tests
-        run: cargo test --verbose
+  deploy:
+
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - uses: actions/checkout@v2
+
+    - name: Deploy to Render
+      uses: render-examples/render-deploy@main
+      env:  
+        RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
+      with:
+        service-name: rishabh-login
+        render-token: ${{ secrets.RENDER_TOKEN }}
+        branch: master
