@@ -20,7 +20,7 @@ async fn main(){
     let pool = pool.expect("could not connect to database");        
 
     let app = Router::new()
-        .route("/", get(|| async{"VG Master Rust API"}))
+        .route("/", get(|| async{"Success"}))
         .route("/login", post(controller::login::get_authenticate))
         .layer(cors_layer)
         .layer(Extension(pool));
