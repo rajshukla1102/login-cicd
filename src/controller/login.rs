@@ -48,10 +48,35 @@ pub async fn get_authenticate(
     }
 }
 
+// #[derive(Serialize, Deserialize, Debug, sqlx::FromRow)]
+// pub struct Order {
+//     pub orderid: String,
+//     pub ordernumber: String,
+//     pub accounts_payment_approval: String,
+//     pub accounts_approval_date: String,
+//     pub accounts_payment_desc: String,
+//     pub accounts_user: i32,
+//     pub accounts_invoiceamt: f64,
+//     pub accounts_receiptamt: f64,
+//     pub acc_approval_ata: String,
+//     pub accounts_currencyint: String,
+//     pub accounts_invoiceamt_currencyint: f64,
+//     pub accounts_receiptamt_currencyint: f64,
+//     pub accounts_chargedate: String,
+// }
+
 pub async fn checkfornull(
     Json(query): Json<Order>,
 ) -> Result<Response<Body>, Response<Body>> {
-        if query.ordernumber.is_empty() || query.accounts_payment_approval.is_empty() || query.accounts_approval_date.is_empty() || query.accounts_payment_desc.is_empty() || query.acc_approval_ata.is_empty() || query.accounts_currencyint.is_empty() || query.accounts_chargedate.is_empty(){
+    if query.orderid.is_empty() || 
+        query.ordernumber.is_empty() || 
+        query.accounts_payment_approval.is_empty() || 
+        query.accounts_approval_date.is_empty() || 
+        query.accounts_payment_desc.is_empty() || 
+        query.acc_approval_ata.is_empty() || 
+        query.accounts_currencyint.is_empty() || 
+        query.accounts_chargedate.is_empty()
+       {
             let json = json!({
                 "status": "Failed"
             });
@@ -165,7 +190,7 @@ mod tests {
     #[tokio::test]
     async fn test_checkfornull_failed() {
         let res = checkfornull(Json(Order {
-            orderid: 1,
+            orderid: "1".to_string(),
             ordernumber: "".to_string(),
             accounts_payment_approval: "approved".to_string(),
             accounts_approval_date: "2021-01-01".to_string(),
@@ -192,7 +217,7 @@ mod tests {
     #[tokio::test]
     async fn test_checkfornull_success() {
         let res = checkfornull(Json(Order {
-            orderid: 1,
+            orderid: "1".to_string(),
             ordernumber: "ordernumber".to_string(),
             accounts_payment_approval: "approved".to_string(),
             accounts_approval_date: "2021-01-01".to_string(),

@@ -9,7 +9,7 @@ pub struct LoginReq {
 
 #[derive(Serialize, Deserialize, Debug, sqlx::FromRow)]
 pub struct Order {
-    pub orderid: i32,
+    pub orderid: String,
     pub ordernumber: String,
     pub accounts_payment_approval: String,
     pub accounts_approval_date: String,
