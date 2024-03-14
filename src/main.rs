@@ -22,6 +22,7 @@ async fn main(){
     let app = Router::new()
         .route("/", get(|| async{"Success"}))
         .route("/login", post(controller::login::get_authenticate))
+        .route("/checkfornull", post(controller::login::checkfornull))
         .layer(cors_layer)
         .layer(Extension(pool));
     

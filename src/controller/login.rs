@@ -3,7 +3,7 @@ use hyper::Body;
 use serde_json::json;
 use sqlx::PgPool;
 
-use crate::model::login::LoginReq;
+use crate::model::login::{LoginReq, Order};
 
 
 pub async fn get_authenticate(
@@ -47,6 +47,34 @@ pub async fn get_authenticate(
         }
     }
 }
+
+pub async fn checkfornull(
+    Json(query): Json<Order>,
+) -> Result<Response<Body>, Response<Body>> {
+        if query.ordernumber.is_empty() || query.accounts_payment_approval.is_empty() || query.accounts_approval_date.is_empty() || query.accounts_payment_desc.is_empty() || query.acc_approval_ata.is_empty() || query.accounts_currencyint.is_empty() || query.accounts_chargedate.is_empty(){
+            let json = json!({
+                "status": "Failed"
+            });
+            let body = Body::from(serde_json::to_vec(&json).unwrap());
+            Ok(Response::builder()
+                .status(status::StatusCode::UNAUTHORIZED)
+                .header("Content-Type", "application/json")
+                .body(body)
+                .unwrap())
+        } else {
+            let json = json!({
+                "status": "Success"
+            });
+            let body = Body::from(serde_json::to_vec(&json).unwrap());
+            Ok(Response::builder()
+                .status(status::StatusCode::OK)
+                .header("Content-Type", "application/json")
+                .body(body)
+                .unwrap())
+        }
+    
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -132,5 +160,59 @@ mod tests {
         let body: Value = serde_json::from_slice(&body).expect("err");
         println!("Response Body at line 138: {:?}", body["status"]);
         assert_eq!(body["status"].as_str().expect("err"), "Failed");
+    }
+
+    #[tokio::test]
+    async fn test_checkfornull_failed() {
+        let res = checkfornull(Json(Order {
+            orderid: 1,
+            ordernumber: "".to_string(),
+            accounts_payment_approval: "approved".to_string(),
+            accounts_approval_date: "2021-01-01".to_string(),
+            accounts_payment_desc: "Payment for order 1".to_string(),
+            accounts_user: 1,
+            accounts_invoiceamt: 100.00,
+            accounts_receiptamt: 100.00,
+            acc_approval_ata: "2021-01-01".to_string(),
+            accounts_currencyint: "USD".to_string(),
+            accounts_invoiceamt_currencyint: 100.00,
+            accounts_receiptamt_currencyint: 100.00,
+            accounts_chargedate: "2021-01-01".to_string(),
+        }))
+        .await
+        .expect("Handler function failed");
+
+        assert_eq!(res.status(), StatusCode::UNAUTHORIZED);
+
+        let body = hyper::body::to_bytes(res.into_body()).await.expect("err in response body reading");
+        let body: Value = serde_json::from_slice(&body).expect("err");
+        assert_eq!(body["status"].as_str().expect("err"), "Failed");
+    }
+
+    #[tokio::test]
+    async fn test_checkfornull_success() {
+        let res = checkfornull(Json(Order {
+            orderid: 1,
+            ordernumber: "ordernumber".to_string(),
+            accounts_payment_approval: "approved".to_string(),
+            accounts_approval_date: "2021-01-01".to_string(),
+            accounts_payment_desc: "Payment for order 1".to_string(),
+            accounts_user: 1,
+            accounts_invoiceamt: 100.00,
+            accounts_receiptamt: 100.00,
+            acc_approval_ata: "2021-01-01".to_string(),
+            accounts_currencyint: "USD".to_string(),
+            accounts_invoiceamt_currencyint: 100.00,
+            accounts_receiptamt_currencyint: 100.00,
+            accounts_chargedate: "2021-01-01".to_string(),
+        }))
+        .await
+        .expect("Handler function failed");
+
+        assert_eq!(res.status(), StatusCode::OK);
+
+        let body = hyper::body::to_bytes(res.into_body()).await.expect("err in response body reading");
+        let body: Value = serde_json::from_slice(&body).expect("err");
+        assert_eq!(body["status"].as_str().expect("err"), "Success");
     }
 }
